@@ -1,0 +1,58 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Load dataset
+df = pd.read_csv("student_dropout_data.csv")
+print("Dataset Loaded Successfully!")
+df.head()
+
+# Convert target labels to numeric: 'yes' -> 1 (dropout), 'no' -> 0
+df['dropout_risk'] = df['dropout_risk'].map({'yes': 1, 'no': 0})
+
+# Features and Target
+X = df[['attendance', 'grades', 'participation']]  # Features
+y = df['dropout_risk']                             # Target
+
+
+# 80% training, 20% testing
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create and train the model
+model = DecisionTreeClassifier()
+model.fit(X_train, y_train)
+
+print("Model Trained Successfully!")
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# Evaluate performance
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+
+
+# Prompt the user for input
+print(" Student Dropout Predictor")
+attendance = float(input("Enter attendance percentage (0–100): "))
+grades = float(input("Enter average grade (0–10): "))
+participation = int(input("Enter participation score (0–10): "))
+
+# Create a DataFrame from the inputs
+import numpy as np
+sample_input = pd.DataFrame(np.array([[attendance, grades, participation]]),
+                            columns=["attendance", "grades", "participation"])
+
+# Predict using trained model
+prediction = model.predict(sample_input)[0]
+
+# Show result
+if prediction == 1:
+    print("\n The student is at RISK of dropping out.")
+else:
+    print("\n The student is NOT at risk of dropping out.")
+
+
+
